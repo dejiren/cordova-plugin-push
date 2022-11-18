@@ -94,7 +94,7 @@ object PushConstants {
   const val GOOGLE_APP_ID: String = "google_app_id"
   const val GCM_DEFAULT_SENDER_ID: String = "gcm_defaultSenderId"
   const val PUSH_DISMISSED: String = "push_dismissed"
-  const val DEFAULT_CHANNEL_ID: String = "PushPluginChannel"
+  const val DEFAULT_CHANNEL_ID: String = "default"
   const val CHANNELS: String = "channels"
   const val CHANNEL_ID: String = "id"
   const val CHANNEL_DESCRIPTION: String = "description"

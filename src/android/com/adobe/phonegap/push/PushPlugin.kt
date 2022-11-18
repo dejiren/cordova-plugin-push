@@ -7,6 +7,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
 import android.content.res.Resources.NotFoundException
 import android.media.AudioAttributes
 import android.net.Uri
@@ -862,4 +863,10 @@ class PushPlugin : CordovaPlugin() {
       FirebaseMessaging.getInstance().unsubscribeFromTopic(it)
     }
   }
+
+  override fun onNewIntent(intent: Intent?) {
+    Log.d(TAG, "onNewIntent intent=${intent}")
+    PushPlugin.sendExtras(intent?.extras)
+  }
+
 }
