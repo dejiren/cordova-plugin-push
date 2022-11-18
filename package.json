@@ -1,5 +1,5 @@
 {
-  "name": "@havesource/cordova-plugin-push",
+  "name": "cordova-plugin-push",
   "version": "3.0.1",
   "description": "Register and receive push notifications.",
   "scripts": {
@@ -11,7 +11,7 @@
     "precommit-msg": "echo 'Pre-commit checks...' && exit 0",
     "test": "npm run build && npm run lint && npm run jasmine"
   },
-  "repository": "github:havesource/cordova-plugin-push",
+  "repository": "github:dejiren/cordova-plugin-push",
   "keywords": [
     "ecosystem:cordova",
     "cordova-ios",
@@ -57,7 +57,7 @@
   },
   "types": "./types/index.d.ts",
   "cordova": {
-    "id": "@havesource/cordova-plugin-push",
+    "id": "cordova-plugin-push",
     "platforms": [
       "ios",
       "android",
