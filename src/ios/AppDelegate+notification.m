@@ -197,7 +197,18 @@ NSString *const pushPluginApplicationDidBecomeActiveNotification = @"pushPluginA
     pushHandler.isInline = YES;
     [pushHandler notificationReceived];
 
-    completionHandler(UNNotificationPresentationOptionNone);
+    if (@available(iOS 14.0, *)) {
+        // iOS14以降の場合
+        completionHandler(UNNotificationPresentationOptionBadge|
+                          UNNotificationPresentationOptionSound|
+                          UNNotificationPresentationOptionList|
+                          UNNotificationPresentationOptionBanner);
+    } else {
+        // iOS14未満の場合
+        completionHandler(UNNotificationPresentationOptionBadge|
+                          UNNotificationPresentationOptionSound|
+                          UNNotificationPresentationOptionAlert);
+    }
 }
 
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center
