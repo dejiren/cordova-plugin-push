@@ -31,25 +31,16 @@
 
 var fs = require('fs');
 var path = require('path');
-const PLUGIN_ID = "cordova-plugin-push";
+const PLUGIN_ID = 'cordova-plugin-push';
 
-function redError(message) {
-    return new Error('"' + PLUGIN_ID + '" \x1b[1m\x1b[31m' + message + '\x1b[0m');
+function redError (message) {
+  return new Error('"' + PLUGIN_ID + '" \x1b[1m\x1b[31m' + message + '\x1b[0m');
 }
 
-function getPreferenceValue (config, name) {
-  var value = config.match(new RegExp('name="' + name + '" value="(.*?)"', "i"));
-  if(value && value[1]) {
-    return value[1];
-  } else {
-    return null;
-  }
-}
-
-console.log('Copying "' + PLUGIN_ID + '/ShareExtension" to ios...');
+console.log('Copying "' + PLUGIN_ID + '/NotificationExtension" to ios...');
 
 // http://stackoverflow.com/a/26038979/5930772
-function copyFileSync(source, target) {
+function copyFileSync (source, target) {
   var targetFile = target;
 
   // If target is a directory a new file with the same name will be created
@@ -62,10 +53,11 @@ function copyFileSync(source, target) {
   fs.writeFileSync(targetFile, fs.readFileSync(source));
 }
 
-function copyFolderRecursiveSync(source, target) {
+function copyFolderRecursiveSync (source, target) {
   var files = [];
 
   // Check if folder needs to be created or integrated
+  // フォルダを作成または統合する必要があるかどうかを確認し必要あれば作成
   var targetFolder = path.join(target, path.basename(source));
   if (!fs.existsSync(targetFolder)) {
     fs.mkdirSync(targetFolder);
@@ -74,7 +66,7 @@ function copyFolderRecursiveSync(source, target) {
   // Copy
   if (fs.lstatSync(source).isDirectory()) {
     files = fs.readdirSync(source);
-    files.forEach(function(file) {
+    files.forEach(function (file) {
       var curSource = path.join(source, file);
       if (fs.lstatSync(curSource).isDirectory()) {
         copyFolderRecursiveSync(curSource, targetFolder);
@@ -86,16 +78,20 @@ function copyFolderRecursiveSync(source, target) {
 }
 
 // Determine the full path to the app's xcode project file.
-function findXCodeproject(context, callback) {
+// アプリの xcode プロジェクトファイルへのフル パスを特定する
+function findXCodeproject (context, callback) {
   var iosFolder = context.opts.cordova.project
     ? context.opts.cordova.project.root
     : path.join(context.opts.projectRoot, 'platforms/ios/');
-  fs.readdir(iosFolder, function(err, data) {
+
+  // XCodeのディレクトリを読み取る
+  fs.readdir(iosFolder, function (err, data) {
     var projectFolder;
     var projectName;
     // Find the project folder by looking for *.xcodeproj
+    // *.xcodeprojを検索
     if (data && data.length) {
-      data.forEach(function(folder) {
+      data.forEach(function (folder) {
         if (folder.match(/\.xcodeproj$/)) {
           projectFolder = path.join(iosFolder, folder);
           projectName = path.basename(folder, '.xcodeproj');
@@ -115,13 +111,13 @@ function findXCodeproject(context, callback) {
   });
 }
 
-module.exports = function(context) {
+module.exports = function (context) {
   var Q = require('q');
-  var deferral = new Q.defer();
+  // var deferral = new Q.defer();
+  var deferral = Q.defer();
 
-  findXCodeproject(context, function(projectFolder, projectName) {
-
-    var srcFolder = path.join(context.opts.projectRoot, 'plugins', PLUGIN_ID, 'src', 'ios', 'ShareExtension');
+  findXCodeproject(context, function (projectFolder, projectName) {
+    var srcFolder = path.join(context.opts.projectRoot, 'plugins', PLUGIN_ID, 'src', 'ios', 'NotificationExtension');
     if (!fs.existsSync(srcFolder)) {
       throw redError('Missing extension project folder in ' + srcFolder + '.');
     }
