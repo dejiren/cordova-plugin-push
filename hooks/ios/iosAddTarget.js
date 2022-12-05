@@ -211,7 +211,8 @@ console.log('Adding target "' + PLUGIN_ID + '/ShareExtension" to XCode project')
 module.exports = function (context) {
   var Q = require('q');
   // 非同期処理
-  var deferral = new Q.defer();
+  var deferral = Q.defer();
+  // var deferral = new Q.defer();
 
   // package.jsonをrequireする
   packageJson = require(path.join(context.opts.projectRoot, 'package.json'));
@@ -337,13 +338,13 @@ module.exports = function (context) {
       '"'
     );
     if (PROVISIONING_PROFILE_SPECIFIER && DEVELOPMENT_TEAM) {
-      var configurations = pbxProject.pbxXCBuildConfigurationSection();
-      for (var key in configurations) {
+      configurations = pbxProject.pbxXCBuildConfigurationSection();
+      for (key in configurations) {
         if (typeof configurations[key].buildSettings !== 'undefined') {
-          var buildSettingsObj = configurations[key].buildSettings;
+          buildSettingsObj = configurations[key].buildSettings;
           // console.log("1" + buildSettingsObj);
           if (typeof buildSettingsObj.PRODUCT_NAME !== 'undefined') {
-            var productName = buildSettingsObj.PRODUCT_NAME;
+            productName = buildSettingsObj.PRODUCT_NAME;
             // console.log("2" + buildSettingsObj);
             if (productName.indexOf('ShareExt') >= 0) {
               buildSettingsObj.DEVELOPMENT_TEAM = DEVELOPMENT_TEAM;
