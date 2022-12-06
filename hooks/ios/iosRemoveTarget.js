@@ -30,7 +30,6 @@
 //
 
 const PLUGIN_ID = 'cordova-plugin-push';
-const BUNDLE_SUFFIX = '.shareextension';
 
 var fs = require('fs');
 var path = require('path');
@@ -86,8 +85,8 @@ function parsePbxProject (context, pbxProjectPath) {
   return pbxProject;
 }
 
-function forEachShareExtensionFile (context, callback) {
-  var shareExtensionFolder = path.join(iosFolder(context), 'ShareExtension');
+function forEachNotificationExtensionFile (context, callback) {
+  var shareExtensionFolder = path.join(iosFolder(context), 'NotificationExtension');
   fs.readdirSync(shareExtensionFolder).forEach(function (name) {
     // Ignore junk files like .DS_Store
     if (!/^\..*/.test(name)) {
@@ -101,17 +100,17 @@ function forEachShareExtensionFile (context, callback) {
 }
 
 // Return the list of files in the share extension project, organized by type
-function getShareExtensionFiles (context) {
+function getNotificationExtensionFiles (context) {
   var files = { source: [], plist: [], resource: [] };
   var FILE_TYPES = { '.h': 'source', '.m': 'source', '.plist': 'plist' };
-  forEachShareExtensionFile(context, function (file) {
+  forEachNotificationExtensionFile(context, function (file) {
     var fileType = FILE_TYPES[file.extension] || 'resource';
     files[fileType].push(file);
   });
   return files;
 }
 
-console.log('Removing target "' + PLUGIN_ID + '/ShareExtension" to XCode project');
+console.log('Removing target "' + PLUGIN_ID + '/NotificationExtension" to XCode project');
 
 module.exports = function (context) {
   var Q = require('q');
@@ -122,11 +121,11 @@ module.exports = function (context) {
 
     var pbxProjectPath = path.join(projectFolder, 'project.pbxproj');
     var pbxProject = parsePbxProject(context, pbxProjectPath);
-    var files = getShareExtensionFiles(context);
+    var files = getNotificationExtensionFiles(context);
 
     // Find if the project already contains the target and group
-    var target = pbxProject.pbxTargetByName('ShareExtension');
-    var pbxGroupKey = pbxProject.findPBXGroupKey({ name: 'ShareExtension' });
+    var target = pbxProject.pbxTargetByName('NotificationExtension');
+    var pbxGroupKey = pbxProject.findPBXGroupKey({ name: 'NotificationExtension' });
 
     // Remove the PbxGroup from cordovas "CustomTemplate"-group
     if (pbxGroupKey) {
@@ -202,7 +201,7 @@ module.exports = function (context) {
     // Write the modified project back to disc
     // console.log('    Writing the modified project back to disk...');
     fs.writeFileSync(pbxProjectPath, pbxProject.writeSync());
-    console.log('Removed ShareExtension from XCode project');
+    console.log('Removed NotificationExtension from XCode project');
 
     deferral.resolve();
   });
