@@ -30,6 +30,7 @@
     "@babel/preset-env": "^7.15.6",
     "@cordova/eslint-config": "^4.0.0",
     "babel-plugin-add-header-comment": "^1.0.3",
+    "elementtree": "^0.1.7",
     "fs-extra": "^10.0.0",
     "jasmine": "^3.9.0",
     "nodemon": "^2.0.12",

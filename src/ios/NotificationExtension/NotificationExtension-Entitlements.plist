@@ -4,8 +4,7 @@
 <dict>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<!-- TODO(nakamura): __GROUP_IDENTIFIER__を設定するようにする -->
-		<string>group.com.wingarc.djr.djrclientrc</string>
+		<string>__GROUP_IDENTIFIER__</string>
 	</array>
 </dict>
 </plist>

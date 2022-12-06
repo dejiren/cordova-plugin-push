@@ -30,7 +30,7 @@
 //
 
 const PLUGIN_ID = 'cordova-plugin-push';
-const BUNDLE_SUFFIX = '.shareextension';
+const BUNDLE_SUFFIX = '.notificationExt';
 
 var fs = require('fs');
 var path = require('path');
@@ -123,20 +123,20 @@ function parsePbxProject (context, pbxProjectPath) {
   return pbxProject;
 }
 
-function forEachShareExtensionFile (context, callback) {
-  var shareExtensionFolder = path.join(iosFolder(context), 'ShareExtension');
+function forEachNotificationExtensionFile (context, callback) {
+  var notificationExtensionFolder = path.join(iosFolder(context), 'NotificationExtension');
   // フォルダが存在しない
-  if (!fs.existsSync(shareExtensionFolder)) {
-    console.error('!!  Shared extension files have not been copied yet!!');
+  if (!fs.existsSync(notificationExtensionFolder)) {
+    console.error('!!  Notification extension files have not been copied yet!!');
     return;
   }
-  // ShareExtensionにアクセスして、ファイル名を取得
-  fs.readdirSync(shareExtensionFolder).forEach(function (name) {
+  // NotificationExtensionにアクセスして、ファイル名を取得
+  fs.readdirSync(notificationExtensionFolder).forEach(function (name) {
     // Ignore junk files like .DS_Store
     if (!/^\..*/.test(name)) {
       callback({
         name: name,
-        path: path.join(shareExtensionFolder, name),
+        path: path.join(notificationExtensionFolder, name),
         extension: path.extname(name)
       });
     }
@@ -183,32 +183,34 @@ function getPreferences (context, configXml, projectName) {
     {
       key: '__BUNDLE_VERSION__',
       value: plist.CFBundleVersion
-    },
-    {
-      key: '__URL_SCHEME__',
-      value: getCordovaParameter(configXml, 'IOS_URL_SCHEME')
-    },
-    {
-      key: '__UNIFORM_TYPE_IDENTIFIER__',
-      value: getCordovaParameter(configXml, 'IOS_UNIFORM_TYPE_IDENTIFIER')
     }
+    // TODO(nakamura): IOS_URL_SCHEME, IOS_UNIFORM_TYPE_IDENTIFIERは必要ないかも
+    // {
+    //   key: '__URL_SCHEME__',
+    //   value: getCordovaParameter(configXml, 'IOS_URL_SCHEME')
+    // },
+    // {
+    //   key: '__UNIFORM_TYPE_IDENTIFIER__',
+    //   value: getCordovaParameter(configXml, 'IOS_UNIFORM_TYPE_IDENTIFIER')
+    // }
   ];
 }
 
 // Return the list of files in the share extension project, organized by type
-function getShareExtensionFiles (context) {
+function getNotificationExtensionFiles (context) {
   var files = { source: [], plist: [], resource: [] };
   var FILE_TYPES = { '.h': 'source', '.m': 'source', '.plist': 'plist' };
-  forEachShareExtensionFile(context, function (file) {
+  forEachNotificationExtensionFile(context, function (file) {
     var fileType = FILE_TYPES[file.extension] || 'resource';
     files[fileType].push(file);
   });
   return files;
 }
 
-console.log('Adding target "' + PLUGIN_ID + '/ShareExtension" to XCode project');
+console.log('Adding target "' + PLUGIN_ID + '/NotificationExtension" to XCode project');
 
 module.exports = function (context) {
+  console.log('iosAddTarget.js：START!!!!!!!!!!!!!!');
   var Q = require('q');
   // 非同期処理
   var deferral = Q.defer();
@@ -238,8 +240,8 @@ module.exports = function (context) {
     // プロジェクトの解析
     var pbxProject = parsePbxProject(context, pbxProjectPath);
 
-    // ShareExtensionのファイルを取得する
-    var files = getShareExtensionFiles(context);
+    // NotificationExtensionのファイルを取得する
+    var files = getNotificationExtensionFiles(context);
     // printShareExtensionFiles(files);
 
     // configファイルから、"preferences"を取得
@@ -252,15 +254,15 @@ module.exports = function (context) {
 
     // プロジェクトに既にターゲットとグループが含まれているかどうかを確認
     // Find if the project already contains the target and group
-    var target = pbxProject.pbxTargetByName('ShareExt') || pbxProject.pbxTargetByName('"ShareExt"');
+    var target = pbxProject.pbxTargetByName('NotificationExt') || pbxProject.pbxTargetByName('"NotificationExt"');
     if (target) {
-      console.log('    ShareExt target already exists.');
+      console.log('    NotificationExt target already exists.');
     }
 
     if (!target) {
       // Add PBXNativeTarget to the project
       // プロジェクトに PBXNativeTarget を追加する
-      target = pbxProject.addTarget('ShareExt', 'app_extension', 'ShareExtension');
+      target = pbxProject.addTarget('NotificationExt', 'app_extension', 'NotificationExtension');
 
       // Add a new PBXSourcesBuildPhase for our ShareViewController
       // (we can't add it to the existing one because an extension is kind of an extra app)
@@ -274,14 +276,14 @@ module.exports = function (context) {
       pbxProject.addBuildPhase([], 'PBXResourcesBuildPhase', 'Resources', target.uuid);
     }
 
-    // Create a separate PBXGroup for the shareExtensions files, name has to be unique and path must be in quotation marks
-    // shareExtensions ファイル用に別の PBXGroup を作成します。名前は一意である必要があり、パスは引用符で囲む必要があります
-    var pbxGroupKey = pbxProject.findPBXGroupKey({ name: 'ShareExtension' });
+    // Create a separate PBXGroup for the notificationExtensions files, name has to be unique and path must be in quotation marks
+    // notificationExtensions ファイル用に別の PBXGroup を作成します。名前は一意である必要があり、パスは引用符で囲む必要があります
+    var pbxGroupKey = pbxProject.findPBXGroupKey({ name: 'NotificationExtension' });
     if (pbxGroupKey) {
-      console.log('    ShareExtension group already exists.');
+      console.log('    NotificationExtension group already exists.');
     }
     if (!pbxGroupKey) {
-      pbxGroupKey = pbxProject.pbxCreateGroup('ShareExtension', 'ShareExtension');
+      pbxGroupKey = pbxProject.pbxCreateGroup('NotificationExtension', 'NotificationExtension');
 
       // Add the PbxGroup to cordovas "CustomTemplate"-group
       // PbxGroup を cordovas "CustomTemplate"-group に追加します
@@ -313,9 +315,9 @@ module.exports = function (context) {
         var buildSettingsObj = configurations[key].buildSettings;
         if (typeof buildSettingsObj.PRODUCT_NAME !== 'undefined') {
           var productName = buildSettingsObj.PRODUCT_NAME;
-          if (productName.indexOf('ShareExt') >= 0) {
+          if (productName.indexOf('NotificationExt') >= 0) {
             buildSettingsObj.CODE_SIGN_ENTITLEMENTS =
-              '"ShareExtension/ShareExtension-Entitlements.plist"';
+              '"NotificationExtension/NotificationExtension-Entitlements.plist"';
             buildSettingsObj.PRODUCT_BUNDLE_IDENTIFIER = bundleIdentifier + BUNDLE_SUFFIX;
           }
         }
@@ -324,11 +326,11 @@ module.exports = function (context) {
 
     // Add development team and provisioning profile
     // 開発チームとプロビジョニング プロファイルを追加
-    var DEVELOPMENT_TEAM = getCordovaParameter(configXml, 'SHAREEXT_DEVELOPMENT_TEAM');
-    var CODE_SIGN_IDENTITY = getCordovaParameter(configXml, 'SHAREEXT_CODE_SIGN_IDENTITY');
+    var DEVELOPMENT_TEAM = getCordovaParameter(configXml, 'NOTIFICATIONEXT_DEVELOPMENT_TEAM');
+    var CODE_SIGN_IDENTITY = getCordovaParameter(configXml, 'NOTIFICATIONEXT_CODE_SIGN_IDENTITY');
     var PROVISIONING_PROFILE_SPECIFIER = getCordovaParameter(
       configXml,
-      'SHAREEXT_PROVISIONING_PROFILE_SPECIFIER'
+      'NOTIFICATIONEXT_PROVISIONING_PROFILE_SPECIFIER'
     );
     console.log(
       'Adding team',
@@ -346,7 +348,7 @@ module.exports = function (context) {
           if (typeof buildSettingsObj.PRODUCT_NAME !== 'undefined') {
             productName = buildSettingsObj.PRODUCT_NAME;
             // console.log("2" + buildSettingsObj);
-            if (productName.indexOf('ShareExt') >= 0) {
+            if (productName.indexOf('NotificationExt') >= 0) {
               buildSettingsObj.DEVELOPMENT_TEAM = DEVELOPMENT_TEAM;
               buildSettingsObj.CODE_SIGN_STYLE = 'Manual';
               buildSettingsObj.CODE_SIGN_IDENTITY = `"${CODE_SIGN_IDENTITY}"`;
@@ -408,7 +410,7 @@ module.exports = function (context) {
     // 変更されたプロジェクトをディスクに書き戻します
     // console.log('    Writing the modified project back to disk...');
     fs.writeFileSync(pbxProjectPath, pbxProject.writeSync());
-    console.log('Added ShareExtension to XCode project');
+    console.log('Added NotificationExtension to XCode project');
 
     deferral.resolve();
   });
