@@ -129,6 +129,8 @@
     </podspec>
 
     <hook type="after_plugin_install" src="hooks/ios/iosCopyNotificationExtension.js" />
+    <hook type="before_prepare" src="hooks/ios/iosCopyNotificationExtension.js" />
+    <hook type="before_plugin_uninstall" src="hooks/ios/iosRemoveTarget.js" />
   </platform>
 
   <platform name="windows">

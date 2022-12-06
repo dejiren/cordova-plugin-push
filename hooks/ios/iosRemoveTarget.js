@@ -39,6 +39,7 @@ function redError (message) {
 }
 
 // Determine the full path to the app's xcode project file.
+// XCodeのプロジェクトファイルのフルパスを特定
 function findXCodeproject (context, callback) {
   fs.readdir(iosFolder(context), function (err, data) {
     var projectFolder;
@@ -61,11 +62,13 @@ function findXCodeproject (context, callback) {
       throw redError(err);
     }
 
+    // XCodeが見つかったら、設定された処理を実行
     callback(projectFolder, projectName);
   });
 }
 
 // Determine the full path to the ios platform
+// iOSプラットフォームのフルパスを返す
 function iosFolder (context) {
   return context.opts.cordova.project
     ? context.opts.cordova.project.root
@@ -86,20 +89,21 @@ function parsePbxProject (context, pbxProjectPath) {
 }
 
 function forEachNotificationExtensionFile (context, callback) {
-  var shareExtensionFolder = path.join(iosFolder(context), 'NotificationExtension');
-  fs.readdirSync(shareExtensionFolder).forEach(function (name) {
+  var notificaitonExtensionFolder = path.join(iosFolder(context), 'NotificationExtension');
+  fs.readdirSync(notificaitonExtensionFolder).forEach(function (name) {
     // Ignore junk files like .DS_Store
     if (!/^\..*/.test(name)) {
       callback({
         name:name,
-        path:path.join(shareExtensionFolder, name),
+        path:path.join(notificaitonExtensionFolder, name),
         extension:path.extname(name)
       });
     }
   });
 }
 
-// Return the list of files in the share extension project, organized by type
+// Return the list of files in the notification extension project, organized by type
+// NotificationExtentionのファイルを返す
 function getNotificationExtensionFiles (context) {
   var files = { source: [], plist: [], resource: [] };
   var FILE_TYPES = { '.h': 'source', '.m': 'source', '.plist': 'plist' };
@@ -114,7 +118,7 @@ console.log('Removing target "' + PLUGIN_ID + '/NotificationExtension" to XCode 
 
 module.exports = function (context) {
   var Q = require('q');
-  var deferral = new Q.defer();
+  var deferral = Q.defer();
 
   findXCodeproject(context, function (projectFolder, projectName) {
     console.log('  - Folder containing your iOS project: ' + iosFolder(context));
@@ -124,25 +128,30 @@ module.exports = function (context) {
     var files = getNotificationExtensionFiles(context);
 
     // Find if the project already contains the target and group
+    // targetにすでに含まれているかチェック
     var target = pbxProject.pbxTargetByName('NotificationExtension');
     var pbxGroupKey = pbxProject.findPBXGroupKey({ name: 'NotificationExtension' });
 
     // Remove the PbxGroup from cordovas "CustomTemplate"-group
+    // CustomTemplateの値を削除
     if (pbxGroupKey) {
       var customTemplateKey = pbxProject.findPBXGroupKey({ name: 'CustomTemplate' });
       pbxProject.removeFromPbxGroup(pbxGroupKey, customTemplateKey);
 
       // Remove files which are not part of any build phase (config)
+      // どのビルド フェーズにも含まれていないファイルを削除します (config)
       files.plist.forEach(function (file) {
         pbxProject.removeFile(file.name, pbxGroupKey);
       });
 
       // Remove source files to our PbxGroup and our newly created PBXSourcesBuildPhase
+      // ソース ファイルを PbxGroup と新しく作成した PBXSourcesBuildPhase から削除します
       files.source.forEach(function (file) {
         pbxProject.removeSourceFile(file.name, { target: target.uuid }, pbxGroupKey);
       });
 
       //  Remove the resource file and include it into the targest PbxResourcesBuildPhase and PbxGroup
+      // リソース ファイルを削除し、ターゲットの PbxResourcesBuildPhase と PbxGroup に含めます
       files.resource.forEach(function (file) {
         pbxProject.removeResourceFile(file.name, { target: target.uuid }, pbxGroupKey);
       });
@@ -199,6 +208,7 @@ module.exports = function (context) {
     // }
 
     // Write the modified project back to disc
+    // 変更されたプロジェクトをディスクに書き戻します
     // console.log('    Writing the modified project back to disk...');
     fs.writeFileSync(pbxProjectPath, pbxProject.writeSync());
     console.log('Removed NotificationExtension from XCode project');
