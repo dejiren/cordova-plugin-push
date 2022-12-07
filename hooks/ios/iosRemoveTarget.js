@@ -30,6 +30,8 @@
 //
 
 const PLUGIN_ID = 'cordova-plugin-push';
+const TARGET_NAME = 'notificationExt';
+const FOLDER_NAME = 'NotificationExtension';
 
 var fs = require('fs');
 var path = require('path');
@@ -89,7 +91,7 @@ function parsePbxProject (context, pbxProjectPath) {
 }
 
 function forEachNotificationExtensionFile (context, callback) {
-  var notificaitonExtensionFolder = path.join(iosFolder(context), 'NotificationExtension');
+  var notificaitonExtensionFolder = path.join(iosFolder(context), FOLDER_NAME);
   fs.readdirSync(notificaitonExtensionFolder).forEach(function (name) {
     // Ignore junk files like .DS_Store
     if (!/^\..*/.test(name)) {
@@ -114,7 +116,7 @@ function getNotificationExtensionFiles (context) {
   return files;
 }
 
-console.log('Removing target "' + PLUGIN_ID + '/NotificationExtension" to XCode project');
+console.log('Removing target "' + PLUGIN_ID + '/' + FOLDER_NAME + '" to XCode project');
 
 module.exports = function (context) {
   var Q = require('q');
@@ -128,9 +130,9 @@ module.exports = function (context) {
     var files = getNotificationExtensionFiles(context);
 
     // Find if the project already contains the target and group
-    // targetにすでに含まれているかチェック
-    var target = pbxProject.pbxTargetByName('NotificationExtension');
-    var pbxGroupKey = pbxProject.findPBXGroupKey({ name: 'NotificationExtension' });
+    // targetを取得
+    var target = pbxProject.pbxTargetByName(TARGET_NAME) || pbxProject.pbxTargetByName('"' + TARGET_NAME + '"');
+    var pbxGroupKey = pbxProject.findPBXGroupKey({ name: FOLDER_NAME });
 
     // Remove the PbxGroup from cordovas "CustomTemplate"-group
     // CustomTemplateの値を削除
@@ -139,7 +141,7 @@ module.exports = function (context) {
       pbxProject.removeFromPbxGroup(pbxGroupKey, customTemplateKey);
 
       // Remove files which are not part of any build phase (config)
-      // どのビルド フェーズにも含まれていないファイルを削除します (config)
+      // プロジェクトからNotificationExtensionのファイルを削除
       files.plist.forEach(function (file) {
         pbxProject.removeFile(file.name, pbxGroupKey);
       });
@@ -211,7 +213,7 @@ module.exports = function (context) {
     // 変更されたプロジェクトをディスクに書き戻します
     // console.log('    Writing the modified project back to disk...');
     fs.writeFileSync(pbxProjectPath, pbxProject.writeSync());
-    console.log('Removed NotificationExtension from XCode project');
+    console.log('Removed ' + FOLDER_NAME + 'from XCode project');
 
     deferral.resolve();
   });
