@@ -32,12 +32,13 @@
 var fs = require('fs');
 var path = require('path');
 const PLUGIN_ID = 'cordova-plugin-push';
+const FOLDER_NAME = 'NotificationExtension';
 
 function redError (message) {
   return new Error('"' + PLUGIN_ID + '" \x1b[1m\x1b[31m' + message + '\x1b[0m');
 }
 
-console.log('Copying "' + PLUGIN_ID + '/NotificationExtension" to ios...');
+console.log('Copying "' + PLUGIN_ID + '/' + FOLDER_NAME + '" to ios...');
 
 // http://stackoverflow.com/a/26038979/5930772
 function copyFileSync (source, target) {
@@ -78,7 +79,7 @@ function copyFolderRecursiveSync (source, target) {
 }
 
 // Determine the full path to the app's xcode project file.
-// アプリの xcode プロジェクトファイルへのフル パスを特定する
+// アプリの xcode プロジェクトファイルへのフルパスを特定する
 function findXCodeproject (context, callback) {
   var iosFolder = context.opts.cordova.project
     ? context.opts.cordova.project.root
@@ -117,7 +118,7 @@ module.exports = function (context) {
   var deferral = Q.defer();
 
   findXCodeproject(context, function (projectFolder, projectName) {
-    var srcFolder = path.join(context.opts.projectRoot, 'plugins', PLUGIN_ID, 'src', 'ios', 'NotificationExtension');
+    var srcFolder = path.join(context.opts.projectRoot, 'plugins', PLUGIN_ID, 'src', 'ios', FOLDER_NAME);
     if (!fs.existsSync(srcFolder)) {
       throw redError('Missing extension project folder in ' + srcFolder + '.');
     }
