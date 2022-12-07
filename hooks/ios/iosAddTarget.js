@@ -31,6 +31,8 @@
 
 const PLUGIN_ID = 'cordova-plugin-push';
 const BUNDLE_SUFFIX = '.notificationExt';
+const TARGET_NAME = 'notificationExt';
+const FOLDER_NAME = 'NotificationExtension';
 
 var fs = require('fs');
 var path = require('path');
@@ -124,10 +126,10 @@ function parsePbxProject (context, pbxProjectPath) {
 }
 
 function forEachNotificationExtensionFile (context, callback) {
-  var notificationExtensionFolder = path.join(iosFolder(context), 'NotificationExtension');
+  var notificationExtensionFolder = path.join(iosFolder(context), FOLDER_NAME);
   // フォルダが存在しない
   if (!fs.existsSync(notificationExtensionFolder)) {
-    console.error('!!  Notification extension files have not been copied yet!!');
+    console.error('!!  ' + FOLDER_NAME + 'files have not been copied yet!!', FOLDER_NAME);
     return;
   }
   // NotificationExtensionにアクセスして、ファイル名を取得
@@ -185,6 +187,8 @@ function getPreferences (context, configXml, projectName) {
       value: plist.CFBundleVersion
     }
     // TODO(nakamura): IOS_URL_SCHEME, IOS_UNIFORM_TYPE_IDENTIFIERは必要ないかも
+    // IOS_URL_SCHEME：URLスキーム
+    // IOS_UNIFORM_TYPE_IDENTIFIER：保存、転送に使用するファイルの種類を表す識別子
     // {
     //   key: '__URL_SCHEME__',
     //   value: getCordovaParameter(configXml, 'IOS_URL_SCHEME')
@@ -207,10 +211,9 @@ function getNotificationExtensionFiles (context) {
   return files;
 }
 
-console.log('Adding target "' + PLUGIN_ID + '/NotificationExtension" to XCode project');
+console.log('Adding target "' + PLUGIN_ID + '/' + FOLDER_NAME + '" to XCode project');
 
 module.exports = function (context) {
-  console.log('iosAddTarget.js：START!!!!!!!!!!!!!!');
   var Q = require('q');
   // 非同期処理
   var deferral = Q.defer();
@@ -232,7 +235,7 @@ module.exports = function (context) {
   // BundleIdをconfig.xmlから取得
   bundleIdentifier = getBundleId(context, configXml);
 
-  // XCodeプロジェクト見つけて、collback処理を実行する
+  // XCodeプロジェクトを見つけて、collback処理を実行する
   findXCodeproject(context, function (projectFolder, projectName) {
     console.log('  - Folder containing your iOS project: ' + iosFolder(context));
 
@@ -247,22 +250,22 @@ module.exports = function (context) {
     // configファイルから、"preferences"を取得
     var preferences = getPreferences(context, configXml, projectName);
     files.plist.concat(files.source).forEach(function (file) {
-      // preferencesをファイルに書き出す？
+      // preferencesをファイルに書き出す
       replacePreferencesInFile(file.path, preferences);
       // console.log('    Successfully updated ' + file.name);
     });
 
     // プロジェクトに既にターゲットとグループが含まれているかどうかを確認
     // Find if the project already contains the target and group
-    var target = pbxProject.pbxTargetByName('NotificationExt') || pbxProject.pbxTargetByName('"NotificationExt"');
+    var target = pbxProject.pbxTargetByName(TARGET_NAME) || pbxProject.pbxTargetByName('"' + TARGET_NAME + '"');
     if (target) {
-      console.log('    NotificationExt target already exists.');
+      console.log('    ' + TARGET_NAME + 'target already exists.');
     }
 
     if (!target) {
       // Add PBXNativeTarget to the project
       // プロジェクトに PBXNativeTarget を追加する
-      target = pbxProject.addTarget('NotificationExt', 'app_extension', 'NotificationExtension');
+      target = pbxProject.addTarget(TARGET_NAME, 'app_extension', FOLDER_NAME);
 
       // Add a new PBXSourcesBuildPhase for our ShareViewController
       // (we can't add it to the existing one because an extension is kind of an extra app)
@@ -278,12 +281,12 @@ module.exports = function (context) {
 
     // Create a separate PBXGroup for the notificationExtensions files, name has to be unique and path must be in quotation marks
     // notificationExtensions ファイル用に別の PBXGroup を作成します。名前は一意である必要があり、パスは引用符で囲む必要があります
-    var pbxGroupKey = pbxProject.findPBXGroupKey({ name: 'NotificationExtension' });
+    var pbxGroupKey = pbxProject.findPBXGroupKey({ name: FOLDER_NAME });
     if (pbxGroupKey) {
-      console.log('    NotificationExtension group already exists.');
+      console.log('    ' + FOLDER_NAME + 'group already exists.');
     }
     if (!pbxGroupKey) {
-      pbxGroupKey = pbxProject.pbxCreateGroup('NotificationExtension', 'NotificationExtension');
+      pbxGroupKey = pbxProject.pbxCreateGroup(FOLDER_NAME, FOLDER_NAME);
 
       // Add the PbxGroup to cordovas "CustomTemplate"-group
       // PbxGroup を cordovas "CustomTemplate"-group に追加します
@@ -309,13 +312,14 @@ module.exports = function (context) {
       pbxProject.addResourceFile(file.name, { target: target.uuid }, pbxGroupKey);
     });
 
+    // Build SettingsのCODE_SIGN_ENTITLEMENTSとPRODUCT_BUNDLE_IDENTIFIERを設定
     var configurations = pbxProject.pbxXCBuildConfigurationSection();
     for (var key in configurations) {
       if (typeof configurations[key].buildSettings !== 'undefined') {
         var buildSettingsObj = configurations[key].buildSettings;
         if (typeof buildSettingsObj.PRODUCT_NAME !== 'undefined') {
           var productName = buildSettingsObj.PRODUCT_NAME;
-          if (productName.indexOf('NotificationExt') >= 0) {
+          if (productName.indexOf(TARGET_NAME) >= 0) {
             buildSettingsObj.CODE_SIGN_ENTITLEMENTS =
               '"NotificationExtension/NotificationExtension-Entitlements.plist"';
             buildSettingsObj.PRODUCT_BUNDLE_IDENTIFIER = bundleIdentifier + BUNDLE_SUFFIX;
@@ -348,7 +352,7 @@ module.exports = function (context) {
           if (typeof buildSettingsObj.PRODUCT_NAME !== 'undefined') {
             productName = buildSettingsObj.PRODUCT_NAME;
             // console.log("2" + buildSettingsObj);
-            if (productName.indexOf('NotificationExt') >= 0) {
+            if (productName.indexOf(TARGET_NAME) >= 0) {
               buildSettingsObj.DEVELOPMENT_TEAM = DEVELOPMENT_TEAM;
               buildSettingsObj.CODE_SIGN_STYLE = 'Manual';
               buildSettingsObj.CODE_SIGN_IDENTITY = `"${CODE_SIGN_IDENTITY}"`;
@@ -410,7 +414,7 @@ module.exports = function (context) {
     // 変更されたプロジェクトをディスクに書き戻します
     // console.log('    Writing the modified project back to disk...');
     fs.writeFileSync(pbxProjectPath, pbxProject.writeSync());
-    console.log('Added NotificationExtension to XCode project');
+    console.log('Added ' + FOLDER_NAME + 'to XCode project');
 
     deferral.resolve();
   });
