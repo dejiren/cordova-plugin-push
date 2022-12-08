@@ -22,7 +22,16 @@
     
     // Modify the notification content here...
     self.bestAttemptContent.title = [NSString stringWithFormat:@"%@ [modified]", self.bestAttemptContent.title];
-    self.bestAttemptContent.badge = @1;
+
+    // groupIDを取得し、バッジ数を取得
+    NSUserDefaults* sharedDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.com.wingarc.djr.djrclientrc"];
+    NSString* appGroup = [sharedDefaults objectForKey:@"djr.app_group"];
+    NSLog(@"appGroup: %@", appGroup);
+    // 現在のバッジ数に+1して設定
+    NSInteger badgeCount = [appGroup length] == 0 ? 1 : [appGroup intValue] + 1;    
+    self.bestAttemptContent.badge = [NSNumber numberWithInteger:badgeCount];
+    // 現在のバッジ数を格納
+    [sharedDefaults setObject:[NSString stringWithFormat:@"%ld", badgeCount] forKey:@"djr.app_group"];
     
     self.contentHandler(self.bestAttemptContent);
 }
