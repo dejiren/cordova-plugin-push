@@ -20,18 +20,14 @@
     self.contentHandler = contentHandler;
     self.bestAttemptContent = [request.content mutableCopy];
     
-    // Modify the notification content here...
-    self.bestAttemptContent.title = [NSString stringWithFormat:@"%@ [modified]", self.bestAttemptContent.title];
-
     // groupIDを取得し、バッジ数を取得
-    NSUserDefaults* sharedDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.com.wingarc.djr.djrclientrc"];
-    NSString* appGroup = [sharedDefaults objectForKey:@"djr.app_group"];
-    NSLog(@"appGroup: %@", appGroup);
+    NSUserDefaults* notificationDefaults = [[NSUserDefaults alloc] initWithSuiteName:NOTIFICATIONEXT_GROUP_IDENTIFIER];
+    NSString* badgeCountData = [notificationDefaults objectForKey:NOTIFICATIONEXT_GROUP_BADGE_KEY];
     // 現在のバッジ数に+1して設定
-    NSInteger badgeCount = [appGroup length] == 0 ? 1 : [appGroup intValue] + 1;    
+    NSInteger badgeCount = [badgeCountData length] == 0 ? 1 : [badgeCountData intValue] + 1;    
     self.bestAttemptContent.badge = [NSNumber numberWithInteger:badgeCount];
     // 現在のバッジ数を格納
-    [sharedDefaults setObject:[NSString stringWithFormat:@"%ld", badgeCount] forKey:@"djr.app_group"];
+    [notificationDefaults setObject:[NSString stringWithFormat:@"%ld", badgeCount] forKey:NOTIFICATIONEXT_GROUP_BADGE_KEY];
     
     self.contentHandler(self.bestAttemptContent);
 }

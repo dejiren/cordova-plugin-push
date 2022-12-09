@@ -9,4 +9,7 @@
 
 @interface NotificationService : UNNotificationServiceExtension
 
+#define NOTIFICATIONEXT_GROUP_IDENTIFIER @"__GROUP_IDENTIFIER__"
+#define NOTIFICATIONEXT_GROUP_BADGE_KEY @"__GROUP_BADGE_KEY__"
+
 @end

@@ -165,6 +165,10 @@ function getPreferences (context, configXml, projectName) {
   if (getCordovaParameter(configXml, 'IOS_GROUP_IDENTIFIER')) {
     group = getCordovaParameter(configXml, 'IOS_GROUP_IDENTIFIER');
   }
+  var badgeKey = 'djr.app_badge';
+  if (getCordovaParameter(configXml, 'IOS_GROUP_BADGE_KEY')) {
+    badgeKey = getCordovaParameter(configXml, 'IOS_GROUP_BADGE_KEY');
+  }
   return [
     {
       key: '__DISPLAY_NAME__',
@@ -177,6 +181,10 @@ function getPreferences (context, configXml, projectName) {
     {
       key: '__GROUP_IDENTIFIER__',
       value: group
+    },
+    {
+      key: '__GROUP_BADGE_KEY__',
+      value: badgeKey
     },
     {
       key: '__BUNDLE_SHORT_VERSION_STRING__',
