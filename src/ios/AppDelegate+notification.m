@@ -225,7 +225,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
         case UIApplicationStateActive:
         {
             PushPlugin *pushHandler = [self getCommandInstance:@"PushNotification"];
-            pushHandler.notificationMessage = userInfo;
+            pushHandler.notificationMessage = response.notification.request.content.userInfo;
             pushHandler.isInline = NO;
             [pushHandler notificationReceived];
             completionHandler();
