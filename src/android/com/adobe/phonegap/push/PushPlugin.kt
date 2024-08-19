@@ -20,7 +20,6 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.android.gms.tasks.Tasks
-import com.google.android.gms.tasks.Tasks
 import com.google.firebase.messaging.FirebaseMessaging
 import me.leolin.shortcutbadger.ShortcutBadger
 import org.apache.cordova.*
@@ -29,7 +28,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
 import java.util.*
-import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutionException
 
 /**
