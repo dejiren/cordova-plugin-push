@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-push",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Register and receive push notifications.",
   "scripts": {
     "build": "babel src/js --out-dir www",
