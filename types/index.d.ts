@@ -116,7 +116,7 @@ declare namespace PhonegapPluginPush {
 		* @param errorHandler Is called when the api encounters an error when attempting to clears the notifications.
 		* @param id Is the notifications uniq id.
 		*/
-		(successHandler: () => any, errorHandler: () => any, id: string): void;
+		clearNotification(successHandler: () => any, errorHandler: () => any, id: string): void;
 	}
 
 	/**
