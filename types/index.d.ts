@@ -110,6 +110,13 @@ declare namespace PhonegapPluginPush {
 		 * @param errorHandler Is called when the api encounters an error when attempting to clears the notifications.
 		 */
 		clearAllNotifications(successHandler: () => any, errorHandler: () => any): void
+		/**
+		* Tells the OS to clear all notifications from the Notification Center
+		* @param successHandler Is called when the api successfully clears the notifications.
+		* @param errorHandler Is called when the api encounters an error when attempting to clears the notifications.
+		* @param id Is the notifications uniq id.
+		*/
+		clearNotification(successHandler: () => any, errorHandler: () => any, id: string): void;
 	}
 
 	/**
@@ -229,13 +236,6 @@ declare namespace PhonegapPluginPush {
 			 */
 			topics?: string[]
 		}
-
-		/**
-		 * Windows specific initialization options.
-		 */
-		windows?: {
-
-		}
 	}
 
 	interface CategoryArray {
@@ -273,7 +273,6 @@ declare namespace PhonegapPluginPush {
 		title?: string
 		/**
 		 * The number of messages to be displayed in the badge iOS or message count in the notification shade in Android.
-		 * For windows, it represents the value in the badge notification which could be a number or a status glyph.
 		 */
 		count: string
 		/**
@@ -334,7 +333,7 @@ declare namespace PhonegapPluginPush {
 		/**
 		 * Boolean sets whether notification posted to this channel should vibrate. Array sets custom vibration pattern. Example - vibration: [2000, 1000, 500, 500]. Cannot be changed after channel is created.
 		 */
-		vibration?: boolean|number[];
+		vibration?: boolean | number[];
 		/**
 		 * Sets whether notifications posted to this channel appear on the lockscreen or not, and if so, whether they appear in a redacted form. 0 = Private, 1 = Public, -1 = Secret.
 		 */
@@ -342,7 +341,7 @@ declare namespace PhonegapPluginPush {
 	}
 
 	interface PushNotificationStatic {
-		new (options: InitOptions): PushNotification
+		new(options: InitOptions): PushNotification
 		/**
 		 * Initializes the plugin on the native side.
 		 * @param options An object describing relevant specific options for all target platforms.
@@ -353,7 +352,7 @@ declare namespace PhonegapPluginPush {
 		 * @param successCallback Is called when the api successfully retrieves the details on the permission.
 		 * @param errorCallback	Is called when the api fails to retrieve the details on the permission.
 		 */
-		hasPermission(successCallback: (data: {isEnabled: boolean}) => void, errorCallback: () => void): void;
+		hasPermission(successCallback: (data: { isEnabled: boolean }) => void, errorCallback: () => void): void;
 		/**
 		 * Android only
 		 * Create a new notification channel for Android O and above.
